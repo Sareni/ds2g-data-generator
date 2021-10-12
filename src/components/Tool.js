@@ -16,6 +16,14 @@ class Tool extends Component {
     output: '',
   }
 
+  hintTexts = {
+    'hintIconAccountKey': 'Fügen Sie hier bitte Ihren persönlichen Account-Key ein. Sie finden Ihren Account-Key in den Account-Einstellungen auf dataplatform.ds2g.io',
+    'hintIconApplicationKey': 'Definieren Sie einen Applikations-Schlüssel für die Demo-Tracks. Diese Feld wird in der Data Platform als "application" angezeigt.',
+    'hintIconEventType': 'In diesem Feld können Sie einen Eventtyp für die Demo-Tracks festlegen. Dieses Feld wird in der Data Platform als "type" angezeigt.',
+    'hintIconEventValue': 'Optional können Sie einen Eventwert zu den Demodaten hinzufügen. Dieses Feld wird in der Data Platform als "value" angezeigt.',
+    'hintIconExecutionTimes': 'Hiermit geben Sie an wie oft die Demodaten erzeugt werden sollen.',
+    'hintIconExecutionDelay': 'Durch diesen Wert bestimmen Sie ob es eine Zeitverzögerung vor den Ausführungen geben soll.',
+  }
 
   constructor(props) {
     super(props);
@@ -31,6 +39,26 @@ class Tool extends Component {
     M.FormSelect.init(elems, {});
   }
 
+  hideHint(e) {
+    const elm = document.getElementById('hint');
+    elm.remove();
+  }
+
+  showHint(e) {
+    const id = e.target.id;
+    const rec = e.target.getBoundingClientRect();
+    const left = rec.left;
+    const top = rec.top + 40;
+    const box = document.createElement('div');
+    box.className = 'hintBox';
+    box.style.top = top + 'px';
+    box.style.left = left + 'px';
+    box.id = 'hint';
+    box.innerHTML = this.hintTexts[id];
+    document.getElementsByTagName('html')[0].appendChild(box);
+
+  }
+
   render() {
     return (
       <div className="container">
@@ -41,33 +69,33 @@ class Tool extends Component {
               <fieldset style={{ border: 'none', margin: '0', padding: '0'}} disabled={this.state.running}>
                       <div className="row">
                           <div className="input-field col s12">
-                          <i className="material-icons prefix grey-text" onMouseOver={() => alert() }>info_outline</i>
+                          <i id="hintIconAccountKey" className="material-icons prefix grey-text" onMouseOver={(e) => this.showHint(e) } onMouseLeave={() => this.hideHint()}>info_outline</i>
                           <input id="accountKey" name="accountKey" type="text" className="validate" value={this.state.accountKey} onChange={evt => this.updateInputValue(evt)} required />
                           <label for="accountKey">Account Key</label>
                           </div>
                       </div>
                       <div class="row">
                           <div className="input-field col s6">
-                          <i className="material-icons prefix grey-text" onMouseOver={() => alert() }>info_outline</i>
+                          <i id="hintIconApplicationKey" className="material-icons prefix grey-text" onMouseOver={(e) => this.showHint(e) } onMouseLeave={() => this.hideHint()}>info_outline</i>
                           <input id="applicationKey" name="applicationKey" type="text" className="validate" value={this.state.applicationKey} onChange={evt => this.updateInputValue(evt)} required />
                           <label for="applicationKey">Applikation</label>
                           </div>
                           <div className="input-field col s6">
-                          <i className="material-icons prefix grey-text" onMouseOver={() => alert() }>info_outline</i>
+                          <i id="hintIconEventType" className="material-icons prefix grey-text" onMouseOver={(e) => this.showHint(e) } onMouseLeave={() => this.hideHint()}>info_outline</i>
                           <input id="eventType" name="eventType" type="text" className="validate" value={this.state.eventType} onChange={evt => this.updateInputValue(evt)} required />
                           <label for="eventType">Eventtyp</label>
                           </div>
                       </div>
                       <div className="row">
                           <div className="input-field col s12">
-                          <i className="material-icons prefix grey-text" onMouseOver={() => alert() }>info_outline</i>
+                          <i id="hintIconEventValue" className="material-icons prefix grey-text" onMouseOver={(e) => this.showHint(e) } onMouseLeave={() => this.hideHint()}>info_outline</i>
                           <textarea id="eventValue" name="eventValue" className="materialize-textarea" value={this.state.eventValue} onChange={evt => this.updateInputValue(evt)} />
                           <label for="eventValue">Eventparameter</label>
                           </div>
                       </div>
                       <div className="row">
                         <div className="input-field col s6">
-                          <i className="material-icons prefix grey-text" onMouseOver={() => alert() }>info_outline</i>
+                          <i id="hintIconExecutionTimes" className="material-icons prefix grey-text" onMouseOver={(e) => this.showHint(e) } onMouseLeave={() => this.hideHint()}>info_outline</i>
                           <select id="executionTimes" name="executionTimes" value={this.state.eventValue} onChange={evt => this.updateInputValue(evt)}>
                             <option value="1">1x</option>
                             <option value="2">2x</option>
@@ -78,7 +106,7 @@ class Tool extends Component {
                           <label for="executionTimes">Anzahl der Ausführungen</label>
                         </div>
                         <div className="input-field col s6">
-                          <i className="material-icons prefix grey-text" onMouseOver={() => alert() }>info_outline</i>
+                          <i id="hintIconExecutionDelay" className="material-icons prefix grey-text" onMouseOver={(e) => this.showHint(e) } onMouseLeave={() => this.hideHint()}>info_outline</i>
                           <select id="executionDelay" name="executionDelay" value={this.state.eventValue} onChange={evt => this.updateInputValue(evt)}>
                             <option value="0">Keine Verzögerung</option>
                             <option value="1">1 Sekunde</option>
@@ -164,14 +192,38 @@ class Tool extends Component {
     */
     _this.setState({
       output: `${_this.state.output}${JSON.stringify(track)}\n`
-    })
+    });
 
     _this.setState({
       remainingExecutionTimes: _this.state.remainingExecutionTimes - 1,
-    })
+    });
+  }
+
+  validateForm = () => {
+    let errorMsg = '';
+    if (!this.state.accountKey) {
+      errorMsg = 'Fehler: Account Key wurde nicht definiert!';
+    } else if (this.state.accountKey.length != 36) {
+      errorMsg = 'Fehler: Account Key muss 36 Zeichen haben!';
+    } else if (!this.state.applicationKey) {
+      errorMsg = 'Fehler: Application Key wurde nicht definiert!';
+    } else if (!this.state.eventType) {
+      errorMsg = 'Fehler: Event Type wurde nicht definiert!';
+    }
+
+    if(errorMsg) {
+      this.setState({
+        output: `${this.state.output}${JSON.stringify(errorMsg)}\n`
+      })
+      return false;
+    }
+    return true;
   }
 
   runDemoTracking = () => {
+    if (!this.validateForm()) {
+      return;
+    }
     TrackingService.initialize(this.state.accountKey, true);
 
     this.setState({
